@@ -54,7 +54,7 @@ sub _send {
 
         #STEP 2		----------- give me another cookie
         $step++;
-        my $req = POST 'http://web2sms.loop.de/sms_agbs.asp',
+        $req = POST 'http://web2sms.loop.de/sms_agbs.asp',
                     [
                         MessageText => $self->{smstext},
                         prefix => $self->{intpref} . $self->{prefix},

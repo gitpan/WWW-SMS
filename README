@@ -25,7 +25,7 @@ BUILDING/INSTALLING
 
 STATUS
 
-  This version (0.07) is currently stable release.
+  This version (0.08) is currently stable release.
   You can find latest version at 
   http://sourceforge.net/projects/www-sms/
   or on CPAN.
@@ -34,6 +34,10 @@ STATUS
 
 
 CHANGELOG
+
+  0.08
+     - Fixed a couple of silly bugs
+     - Added simple tests
 
   0.07
      - New submodules: Enel (by me), GsmboxDE and 

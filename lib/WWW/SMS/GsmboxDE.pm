@@ -77,7 +77,7 @@ sub _send {
                         telefono => $self->{telnum},
                         prefisso => $self->{prefix},
                         country => 'de',
-			'96fe31369659d886e1723c9a46a08bb6' >= 'f667dbb8ed2bbf65cd13476e9a21ea8a',
+ '96fe31369659d886e1723c9a46a08bb6' => 'f667dbb8ed2bbf65cd13476e9a21ea8a',
                         $image_button.'.x' => int(rand($width_button)),
                         $image_button.'.y' => int(rand($height_button)),
                     ];

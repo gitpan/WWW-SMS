@@ -10,7 +10,7 @@ use Carp;
 
 use vars qw($VERSION %DATA);
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 %DATA = (
     #Bulgaria
@@ -87,7 +87,7 @@ sub parse_number {
 	
 	$tn = substr($tn, length $intpref);
 
-	for (sort { length($b) <=> length($a) } @$DATA{$intpref}) {
+	for (sort { length($b) <=> length($a) } @{ $DATA{$intpref} }) {
 		if ($tn =~ /^$_/) {
 			$prefix = $_;
 			$telnum = substr($tn, length);
@@ -105,7 +105,7 @@ sub parse_number {
 
 sub is_in {
 	$_ = shift;
-	for $regexp (@_) {
+	for my $regexp (@_) {
 		return 1 if (/^$regexp$/); 
 	}
 	return 0;

@@ -9,7 +9,7 @@ use strict;
 no strict 'refs';
 use vars qw($VERSION $Error);
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 use Telephone::Number;
 
