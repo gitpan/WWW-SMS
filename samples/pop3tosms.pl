@@ -9,48 +9,50 @@
 ### an e-mail (you'll love getting SPAM!) ;)                       ###
 ######################################################################
 
-use Net::POP3;
+use strict;
 use WWW::SMS;
+use Net::POP3;
 
 my $server = 'my_pop_server';
 my $username = 'username';
 my $password = 'password';
-my $gateway = 'a_working_gateway';
-my $intpref = 'intpref'; #without the initial '+', please
+my $intpref = 'intpref';
 my $opprefix = 'opprefix';
 my $phonenumber = 'phonenumber';
 
 my ($subject, $from);
 
+my %oldmsg;
+
 open(IN, "< messages.txt");
 while (<IN>) {
-	chomp;
-	$oldmsg{$_} = 1;
+    chomp;
+    $oldmsg{$_}++;
 }
 close(IN);
 
 my $pop = Net::POP3->new($server);
 
-(my $mail = $pop->login($username, $password)) || die "Can't connect to $server\n";
+my $mail = $pop->login($username, $password) || die "Can't connect to $server\n";
 
-%uid = %{$pop->uidl()};
+my %uid = %{$pop->uidl()};
 
-@msgid = values %uid;
-@msgnum = keys %uid;
-
-for (my $i=0; $i < $mail; $i++) {
-	unless (exists $oldmsg{$msgid[$i]}) {
-		$mailH = join ('', @{$pop->top($msgnum[$i])} );
-		($mailH =~ /^From: (.+)/m) && ($from = $1);
-		($mailH =~ /^Subject: (.+)/m) && ($subject = $1);
-		my $sms = WWW::SMS::new
-			($intpref, $opprefix, $phonenumber, "New message from $from - $subject\n")
-		$sms->send($gateway) || print $WWW::SMS::Error;
-	}
+for my $msgnum (keys %uid) {
+    unless (exists $oldmsg{ $uid{$msgnum} }) {
+        my $mailH = join ('', @{$pop->top( $msgnum )} );
+        my ($from)    = $mailH =~ /^From: (.+)/m;
+        my ($subject) = $mailH =~ /^Subject: (.+)/m;
+        $_ =~ tr/@/A/ for ($from, $subject); #this is cause some gates don't like @
+        my $sms = WWW::SMS->new
+            ($intpref, $opprefix, $phonenumber, "New message from $from - $subject");
+        for my $gate ( $sms->gateways(sorted => 'reliability') ) {
+            $sms->send($gate) && last;
+        }
+    }
 }
 
 $pop->quit();
 
 open(OUT, "> messages.txt");
-	print OUT join("\n", @msgid);
+    print OUT join($/, values %uid);
 close(OUT);

@@ -1,112 +1,116 @@
-#Copyright (c) 2001 Giulio Motta. All rights reserved.
+#Copyright (c) 2001-2002 Giulio Motta. All rights reserved.
 #http://www-sms.sourceforge.net/
 #This program is free software; you can redistribute it and/or
 #modify it under the same terms as Perl itself.
 
 package WWW::SMS;
 
-$VERSION = '0.05';
+use strict;
+no strict 'refs';
+use vars qw($VERSION $Error);
+
+$VERSION = '0.06';
 
 use Telephone::Number;
 
 my %RELIABILITY = (
-	'Clarence' => 99,     #Italian Gateways
-	'Vizzavi' => 80,
-	'GsmboxIT' => 20,
-	'SFR' => 50,          #French Gateways
-	'Beeline' => 50,      #Russian Gateways
-	'MTS' => 50,
-	'GsmboxUK' => 20,     #UK Gateways
-	'GoldenTelecom' => 0, #World Gateways
+    'Clarence'      => 85, #Italian Gateways
+    'Vizzavi'       => 80,
+    'GsmboxIT'      => 20,
+    'SFR'           => 50, #French Gateways
+    'Beeline'       => 50, #Russian Gateways
+    'MTS'           => 50,
+    'GsmboxUK'      => 20, #UK Gateways
+    'GoldenTelecom' =>  0, #World Gateways
 );
 
 sub new {
-	my ($self, $tn, $key, $value);
-	my $class = shift;
-	if ( (@_ > 2 ) && $_[2] =~ /^\d+$/) { # this suppose no %hash key is all numeric
-		$tn = Telephone::Number->new(shift, shift, shift);
-	} else {
-		$tn = Telephone::Number->new(shift);
-	}
-	my ($smstext, %hash) = @_;
-		$self = bless {
-			'tn' => $tn,
-			'whole_number' => $tn->whole_number(),
-			'smstext' => $smstext,
-			'cookie_jar' => exists $hash{cookie_jar} ? 
-					delete $hash{cookie_jar} : 
-					"lwpcookies.txt",
-		}, $class;
-		@{$self}{keys %{$tn}} = @{$tn}{keys %{$tn}};
-		@{$self}{keys %hash} = @hash{keys %hash}; #dragonchild suggestion
-	$self;
+    my ($self, $tn, $key, $value);
+    my $class = shift;
+    if ( (@_ > 2 ) && $_[2] =~ /^\d+$/) { # this suppose no %hash key is all numeric
+        $tn = Telephone::Number->new(shift, shift, shift);
+    } else {
+        $tn = Telephone::Number->new(shift);
+    }
+    my ($smstext, %hash) = @_;
+    $self = bless {
+        'tn' => $tn,
+        'whole_number' => $tn->whole_number(),
+        'smstext' => $smstext,
+        'cookie_jar' => exists $hash{cookie_jar} ? 
+                        delete $hash{cookie_jar} : 
+                        "lwpcookies.txt",
+    }, $class;
+    @{$self}{keys %{$tn}} = @{$tn}{keys %{$tn}};
+    @{$self}{keys %hash} = @hash{keys %hash}; #dragonchild suggestion
+    $self;
 }
 
 sub send {
-	my ($sms, $gate) = @_;
-	my @PREFIXES;
-	my $gateway = "WWW::SMS::$gate";
-	eval "use $gateway";
-        if ($@) {
-		$Error = "not such a gateway available: $gate ($@)";
-		return;
-	}
-	@PREFIXES = @{ $gateway . '::PREFIXES' };
-	if (@PREFIXES) {
-		for (@PREFIXES) {
-			return &{ $gateway . '::_send'} ($sms)
-				if ($sms->{tn}->fits($_));
-		}
-	} else {
-		return &{ $gateway . '::_send' } ($sms);
-	}
-	$Error = "Telephone number $sms->{whole_number} not compatible with $gate gateway";
-	return;			
+    my ($sms, $gate) = @_;
+    my @PREFIXES;
+    my $gateway = "WWW::SMS::$gate";
+    eval "use $gateway";
+    if ($@) {
+        $Error = "not such a gateway available: $gate ($@)";
+        return;
+    }
+    @PREFIXES = @{ $gateway . '::PREFIXES' };
+    if (@PREFIXES) {
+        for (@PREFIXES) {
+            return &{ $gateway . '::_send'} ($sms)
+                if ($sms->{tn}->fits($_));
+        }
+    } else {
+        return &{ $gateway . '::_send' } ($sms);
+    }
+    $Error = "Telephone number $sms->{whole_number} not compatible with $gate gateway";
+    return;         
 }
 
-sub send_sms { #for backward compatibility
-	my ($class, $sms, $gate) = @_;
-	$sms->send($gate);
+sub send_sms { #for backward compatibility only
+    my ($class, $sms, $gate) = @_;
+    $sms->send($gate);
 }
 
 sub gateways {
-	$_ = shift;
-	my $sms = ref $_ ? $_ : undef;
-	my %hash = @_;
-	my (@gates, @realgates, @PREFIXES, %seen);
-	my $gate, $gateway;
-	for (@INC) {
-		opendir(DIR, "$_/WWW/SMS") || next;
-			push @gates, grep {
-				(/^(.+)\.pm$/i) && 
-				(! $seen{$1} ++)&& 
-				($_ = $1)
-			} readdir(DIR);
-		closedir(DIR);
-	}
-	if ($sms) {
-		for $gate (@gates) {
-			$gateway = "WWW::SMS::$gate";
-			eval "use $gateway";
-			print "$@" if ($@);
-			@PREFIXES = @{ $gateway . '::PREFIXES' };
-			if (@PREFIXES) {
-				for (@PREFIXES) {
-					if ($sms->{tn}->fits($_)) {
-						push @realgates, $gate;
-						next;
-					}
-				}
-			} else {
-				push @realgates, $gate;
-			}
-		}
-		@gates = @realgates;
-	}
-	if ($hash{sorted} eq 'reliability') {
-		@gates = sort {$RELIABILITY{$b} <=> $RELIABILITY{$a}} @gates;
-	}
-	return @gates;
+    $_ = shift;
+    my $sms = ref $_ ? $_ : undef;
+    my %hash = @_;
+    my (@gates, @realgates, @PREFIXES, %seen);
+    my ($gate, $gateway);
+    for (@INC) {
+        opendir(DIR, "$_/WWW/SMS") || next;
+            push @gates, grep {
+                /^(.+)\.pm$/i and 
+                !$seen{$1}++  and 
+                $_ = $1
+            } readdir(DIR);
+        closedir(DIR);
+    }
+    if ($sms) {
+        for $gate (@gates) {
+            $gateway = "WWW::SMS::$gate";
+            eval "use $gateway";
+            print "$@" if ($@);
+            @PREFIXES = @{ $gateway . '::PREFIXES' };
+            if (@PREFIXES) {
+                for (@PREFIXES) {
+                    if ($sms->{tn}->fits($_)) {
+                        push @realgates, $gate;
+                        next;
+                    }
+                }
+            } else {
+                push @realgates, $gate;
+            }
+        }
+        @gates = @realgates;
+    }
+    if ($hash{sorted} eq 'reliability') {
+        @gates = sort {$RELIABILITY{$b} <=> $RELIABILITY{$a}} @gates;
+    }
+    return @gates;
 }
 
 
@@ -120,22 +124,23 @@ WWW::SMS - sends SMS using service provided by free websites
 
     use WWW::SMS;
     my $sms = WWW::SMS->new(
-	    '39',                #international prefix
-	    '333',               #operator prefix
-	    '1234567',           #phone number
-	    'This is a test.',   #message text
-	    username => 'abcde', #optional parameters
-	    passwd => 'edcba'    #in hash fashion
+        '39',                #international prefix
+        '333',               #operator prefix
+        '1234567',           #phone number
+        'This is a test.',   #message text
+        username => 'abcde', #optional parameters
+        passwd => 'edcba'    #in hash fashion
     );
 
     #or now even just
     my $sms = WWW::SMS->new($whole_number, $smstext);
     
-    for ( $sms->gateways() ) {     #for every compatible gateway
+    for ( $sms->gateways(sorted => 'reliability') ) {
+                                   #for every compatible gateway
         if ($sms->send( $_ ) {     #try to send sms
             last;                  #until it succeds
         } else {
-            print $WWW::SMS:Error; #here the error
+            print $WWW::SMS:Error; #here is the error
         }
     }
 
@@ -225,7 +230,7 @@ So, now you got WWW::SMS but what's next? Well, all that's cool about it
 resides in submodules. A submodule got to do the dirty work of GETting and
 POSTing webpages.
 How to write a submodule then?
-There a few points to observe:
+There are a few points to observe:
 
 =over
 
@@ -268,7 +273,8 @@ share his/her new & cool submodules implementation. Thank you.
 
 =head1 COPYRIGHT
 
-Copyright 2001 Giulio Motta.
+Copyright 2001-2002 Giulio Motta E<giulienk@cpan.org>.
+Project page at http://www-sms.sourceforge.net/
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

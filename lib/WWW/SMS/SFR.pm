@@ -54,16 +54,14 @@ sub hnd_error {
 sub _send {
     my $self = shift;
 
-    use HTTP::Cookies;
-    use Time::localtime;
-    use Time::Local;
-    eval('use Date::Manip');
-	if ($@) {
-		$WWW::SMS::Error = 'SFR.pm requires Date::Manip: ' . $@;
-		return;
-	}
-    use LWP::UserAgent;
-    use HTTP::Request;
+    require HTTP::Cookies;
+    #require Time::localtime;
+    #require Time::Local;
+    require Date::Manip;
+    require LWP::UserAgent;
+    require HTTP::Request;
+
+    import Date::Manip qw/ ParseDate UnixDate /;
 
     my $step = 1;
 

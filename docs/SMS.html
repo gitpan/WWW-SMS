@@ -30,12 +30,12 @@
 <PRE>
     use WWW::SMS;
     my $sms = WWW::SMS-&gt;new(
-            '39',                #international prefix
-            '333',               #operator prefix
-            '1234567',           #phone number
-            'This is a test.',   #message text
-            username =&gt; 'abcde', #optional parameters
-            passwd =&gt; 'edcba'    #in hash fashion
+        '39',                #international prefix
+        '333',               #operator prefix
+        '1234567',           #phone number
+        'This is a test.',   #message text
+        username =&gt; 'abcde', #optional parameters
+        passwd =&gt; 'edcba'    #in hash fashion
     );</PRE>
 <PRE>
     #or now even just
@@ -43,11 +43,12 @@
 </PRE>
 <PRE>
 
-    for ( $sms-&gt;gateways() ) {     #for every compatible gateway
+    for ( $sms-&gt;gateways(sorted =&gt; 'reliability') ) {
+                                   #for every compatible gateway
         if ($sms-&gt;send( $_ ) {     #try to send sms
             last;                  #until it succeds
         } else {
-            print $WWW::SMS:Error; #here the error
+            print $WWW::SMS:Error; #here is the error
         }
     }</PRE>
 <P>
@@ -114,7 +115,7 @@ Like this:
 resides in submodules. A submodule got to do the dirty work of GETting and
 POSTing webpages.
 How to write a submodule then?
-There a few points to observe:</P>
+There are a few points to observe:</P>
 <OL>
 <LI><STRONG><A NAME="item_Take_a_look_at_submodules_provided_as_example_firs">Take a look at submodules provided as example first!</A></STRONG><BR>
 
@@ -154,7 +155,8 @@ share his/her new &amp; cool submodules implementation. Thank you.
 <P>
 <HR>
 <H1><A NAME="copyright">COPYRIGHT</A></H1>
-<P>Copyright 2001 Giulio Motta.</P>
+<P>Copyright 2001-2002 Giulio Motta &giulienk@cpan.org;.
+Project page at <A HREF="http://www-sms.sourceforge.net/">http://www-sms.sourceforge.net/</A></P>
 <P>This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.</P>
 

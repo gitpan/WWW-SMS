@@ -6,9 +6,8 @@
 
 ######################################################################
 ### This is a simple Tk front-end to easily send SMSs and have a   ###
-### personal phonebook too. I know it's really badly written       ###
-### but it's anyway a good starting point to write                 ###
-### your own applications                                          ###
+### personal phonebook too. I know it's really crap written, but   ###
+### it's anyway a good point to start coding your own applications ###
 ######################################################################
 
 use Tk;
@@ -21,14 +20,16 @@ while (<IN>) {
 }
 close(IN);
 
-@gateways = WWW::SMS->gateways();
+my @gateways = WWW::SMS->gateways();
 
-for (@gateways) {
-	eval 'use WWW::SMS::'. $_ .' qw(MAXLENGTH)';
-	$maxlengths{$_} = &MAXLENGTH;
+my %maxlengths;
+
+for my $gate (@gateways) {
+	eval 'use WWW::SMS::' . $gate ;
+	$maxlengths{$gate} = &{'WWW::SMS::' . $gate . '::MAXLENGTH'};
 }
 
-my $maxlength = $maxlengths{@gateways[0]};
+my $maxlength = $maxlengths{$gateways[0]};
 
 $main = MainWindow->new();
 
@@ -44,11 +45,14 @@ $frmlfl = $frmlft->Frame()->pack(-side => 'left', -fill=> 'y');
 $frmlfr = $frmlft->Frame()->pack(-side => 'right', -fill=> 'y');
 
 $namelabel = $frmlfl->Label(-text => 'Name')->pack();
+$intlabel = $frmlfl->Label(-text => 'Int. Prefix')->pack();
 $preflabel = $frmlfl->Label(-text => 'Prefix')->pack();
 $numlabel = $frmlfl->Label(-text => 'Number')->pack();
 
 $nametext = $frmlfr->Entry(-width => '10', -background => 'white',
 						 -textvariable => \$name)->pack();
+$inttext = $frmlfr->Entry(-width => '10', -background => 'white',
+						 -textvariable => \$intpref)->pack();
 $preftext = $frmlfr->Entry(-width => '10', -background => 'white',
 						 -textvariable => \$pref)->pack();
 $numtext = $frmlfr->Entry(-width => '10', -background => 'white',
@@ -70,6 +74,9 @@ my $opt = $frmlfb->Optionmenu(
                 -variable => \$gateway,
                 )->pack;
 
+my $error_msg;
+my $errortext = $frmlfb->Entry(-width => '40', -background => 'white',
+						 -textvariable => \$error_msg)->pack();
 
 $listFrame = $frmrg->Frame()->pack(-side => 'top');
 $list = $listFrame->Listbox(-background => 'white')->pack(-side => 'left',
@@ -100,16 +107,14 @@ close(OUT);
 ###ENDMAIN###
 
 sub add_user {
-	if (($nametext->get) && ($preftext->get) && ($numtext->get)) {
-		push @phonebook, [$nametext->get,$preftext->get,$numtext->get];
+	if (($nametext->get) && ($inttext->get) && ($preftext->get) && ($numtext->get)) {
+		push @phonebook, [$nametext->get,$inttext->get,$preftext->get,$numtext->get];
 		$list->insert(end, $nametext->get);
 	}
 }
 
 sub update_texts {
-	$name = $phonebook[$list->curselection][0];
-	$pref = $phonebook[$list->curselection][1];
-	$num = $phonebook[$list->curselection][2];
+	($name, $intpref, $pref, $num) = @{ $phonebook[$list->curselection] };
 }
 
 sub remove_user {
@@ -121,9 +126,7 @@ sub remove_user {
 }
 
 sub clear_fields {
-	$name = '';
-	$pref = '';
-	$num = '';
+	($name, $intpref, $pref, $num) = ('', '', '', '');
 }
 
 sub count_chars {
@@ -137,11 +140,15 @@ sub count_chars {
 sub send_sms {
 
 	my $sms = WWW::SMS->new(
-			'39', 
+			$inttext->get,
 			$preftext->get,
 			$numtext->get,
 			$msgtext->get("1.0", end)
 		);
 
-	print "Message sent!\n" if ($sms->send($gateway));
+	if ($sms->send($gateway)) {
+		$error_msg = 'Message sent!';
+	} else {
+		$error_msg = "Error: $WWW::SMS::Error";
+	}
 }
