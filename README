@@ -25,7 +25,7 @@ BUILDING/INSTALLING
 
 STATUS
 
-  This version (0.06) is currently stable release.
+  This version (0.07) is currently stable release.
   You can find latest version at 
   http://sourceforge.net/projects/www-sms/
   or on CPAN.
@@ -34,6 +34,12 @@ STATUS
 
 
 CHANGELOG
+
+  0.07
+     - New submodules: Enel (by me), GsmboxDE and 
+       LoopDE (by Juergen Weigert)
+     - No more silly __DATA__ in Telephone:Number.
+     - Now we "use strict" even in Telephone:Number.
 
   0.06
      - We begin to use strict

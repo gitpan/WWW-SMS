@@ -9,19 +9,22 @@ use strict;
 no strict 'refs';
 use vars qw($VERSION $Error);
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 use Telephone::Number;
 
 my %RELIABILITY = (
-    'Clarence'      => 85, #Italian Gateways
-    'Vizzavi'       => 80,
-    'GsmboxIT'      => 20,
-    'SFR'           => 50, #French Gateways
-    'Beeline'       => 50, #Russian Gateways
-    'MTS'           => 50,
-    'GsmboxUK'      => 20, #UK Gateways
-    'GoldenTelecom' =>  0, #World Gateways
+    Enel          => 90, #Italian Gateways
+    Vizzavi       => 50,
+    GsmboxIT      => 20,
+    Clarence      =>  0,
+    SFR           => 50, #French Gateways
+    Beeline       => 50, #Russian Gateways
+    MTS           => 50,
+    GsmboxUK      => 20, #UK Gateways
+    LoopDE        => 50, #German Gateways
+    GsmboxDE      => -1,
+    GoldenTelecom =>  0, #World Gateways
 );
 
 sub new {
@@ -52,14 +55,14 @@ sub send {
     my $gateway = "WWW::SMS::$gate";
     eval "use $gateway";
     if ($@) {
-        $Error = "not such a gateway available: $gate ($@)";
+        $Error = "No such a gateway available: $gate ($@)";
         return;
     }
     @PREFIXES = @{ $gateway . '::PREFIXES' };
     if (@PREFIXES) {
         for (@PREFIXES) {
             return &{ $gateway . '::_send'} ($sms)
-                if ($sms->{tn}->fits($_));
+                if $sms->{tn}->fits($_);
         }
     } else {
         return &{ $gateway . '::_send' } ($sms);
@@ -96,9 +99,9 @@ sub gateways {
             @PREFIXES = @{ $gateway . '::PREFIXES' };
             if (@PREFIXES) {
                 for (@PREFIXES) {
-                    if ($sms->{tn}->fits($_)) {
+                    if ( $sms->{tn}->fits($_) ) {
                         push @realgates, $gate;
-                        next;
+                        last;
                     }
                 }
             } else {
@@ -273,7 +276,7 @@ share his/her new & cool submodules implementation. Thank you.
 
 =head1 COPYRIGHT
 
-Copyright 2001-2002 Giulio Motta E<giulienk@cpan.org>.
+Copyright 2001-2002 Giulio Motta I<giulienk@cpan.org>.
 Project page at http://www-sms.sourceforge.net/
 
 This library is free software; you can redistribute it and/or

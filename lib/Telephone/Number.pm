@@ -5,9 +5,36 @@
 
 package Telephone::Number;
 
-$VERSION = '0.05';
-
+use strict;
 use Carp;
+
+use vars qw($VERSION %DATA);
+
+$VERSION = '0.07';
+
+%DATA = (
+    #Bulgaria
+    359 => [88, 87],
+    #Finland
+    358 => [40, 50, 41],
+    #France
+    33  => [6],
+    #Germany
+    49  => [151, 160, 162, 152, 1520, 170..180, 163],
+    #Italy
+    39  => [330, 333.340, 360, 368, 340, 347..349, 328, 329, 380, 388, 389],
+    #Russia
+    7   => [901..903, 910],
+    #Spain
+    34  => [600, 605..610, 615..620, 626, 627, 629, 630, 636, 637, 639,
+            646, 647, 649..662, 666, 667, 669, 670, 676..680, 686, 687,
+            689, 690, 696, 697, 699],
+    #United Kingdom
+    44  => [qw/370 374 378 385 401 402 403 410 411 421 441 467 468 498 585 
+            589 772 780 798 802 831 836 850 860 966 973 976 4481 4624 7000 
+            7002 7074 7624 7730 7765 7771 7781 7787 7866 7939 7941 7956 7957 
+            7958 7961 7967 7970 7977 7979 8700 9797/]
+);  
 
 sub new {
 	my $class = shift;
@@ -18,7 +45,7 @@ sub new {
 	($_, @_) = &parse_number($_) if (@_ == 0);
 	$self = bless {
 			intpref => $_,
-			prefix => shift,,
+			prefix => shift,
 			telnum => shift,
 		} , $class;
 	$self;
@@ -47,29 +74,20 @@ sub whole_number {
 
 sub parse_number {
 	my $tn = shift;
-	my ($key, @arr, @prefixes, $intpref, $prefix, $telnum);
+	my ($intpref, $prefix, $telnum);
 
-	while (<DATA>) {
-		next if (/^#/);
-		if (/^(\d+)/ && $tn =~ /^($1)/) {
-			chomp;
-			@arr = split;
-			shift @arr;
-			push @prefixes, @arr;
-			$intpref ||= $1;
-		}
-	}
-	
-	seek (DATA, 0, 0);
-	
+    for (keys %DATA) {
+        $intpref = $_ and last if $tn =~ /^$_/;
+    }
+    
 	unless ($intpref) {
 		carp "No matching international prefix found";
 		return (undef, undef, $tn);
 	}
 	
-	$tn = substr($tn, length($intpref));
+	$tn = substr($tn, length $intpref);
 
-	for (sort { length($b) <=> length($a) } @prefixes) {
+	for (sort { length($b) <=> length($a) } @$DATA{$intpref}) {
 		if ($tn =~ /^$_/) {
 			$prefix = $_;
 			$telnum = substr($tn, length);
@@ -96,25 +114,3 @@ sub is_in {
 
 1;
 
-__DATA__
-#Bulgaria
-359 88 87
-#Finland
-358 40 50 41
-#France
-33 6
-#Germany
-49 151 160 170 171 175 162 152 1520
-49 172 173 174 163 177 178 176 179
-#Italy
-39 333 334 335 338 339 330 336 337 360 368 340 347 348 349 328 329 380 388 389
-#Russia
-7 901 903 902 910
-#Spain
-34 600 605 606 607 608 609 610 615 616 617 619 620 626 627 629 630 636 637 639
-34 646 647 649 650 651 652 653 654 655 656 657 658 659 660 661 662 666 667 669
-34 670 676 677 678 679 680 686 687 689 690 696 697 699
-#United Kingdom
-44 370 374 378 385 401 402 403 410 411 421 441 467 468 498 585 589 772 780 798 
-44 802 831 836 850 860 966 973 976 4481 4624 7000 7002 7074 7624 7730 7765 7771
-44 7781 7787 7866 7939 7941 7956 7957 7958 7961 7967 7970 7977 7979 8700 9797

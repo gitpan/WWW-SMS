@@ -16,12 +16,6 @@ $VERSION = '1.00';
 
 sub MAXLENGTH ()	{160}
 
-sub hnd_error {
-	$_ = shift;
-	$WWW::SMS::Error = "Failed at step $_ of module GoldenTelecom.pm\n";
-	return 0;
-}
-
 sub _send {
 	my $self = shift;
 
@@ -31,17 +25,10 @@ sub _send {
 
 	$ua = LWP::UserAgent->new;
 	$ua->agent('Mozilla/5.0');
-	$ua->proxy('http', $self->{proxy}) if ($self->{proxy});
-	$ua->cookie_jar(HTTP::Cookies->new(
-						file => $self->{cookie_jar},
-						autosave => 1
-					)
-	);
+	$ua->cookie_jar(HTTP::Cookies->new(file => "lwpcookies.txt", autosave => 1));
 
 	$self->{smstext} = substr($self->{smstext}, 0, MAXLENGTH - 1) if (length($self->{smstext})>MAXLENGTH);
 
-	#STEP 1
-	my $step = 1;
 	$req = POST 'http://sms.gt.com.ua:8080/SendSM.htm',
 		[
 		'SM' => $self->{smstext} ,
@@ -50,10 +37,10 @@ sub _send {
 		'CS' => 'S' ,
 		];
 	$req->headers->referer('http://sms.gt.com.ua/index.htm');
+	print "1...";
 	$file = $ua->simple_request($req)->as_string;
-	return &hnd_error($step) unless ($file =~ /Message sent/s);
-	#STEP 1
-	$ua->cookie_jar->clear('sms.gt.com.ua');
+	return 0 unless ($file =~ /Message\ sent/s);
+	$ua->cookie_jar->clear();
 	1;
 }
 

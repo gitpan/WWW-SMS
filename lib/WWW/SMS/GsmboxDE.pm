@@ -2,19 +2,21 @@
 #http://www-sms.sourceforge.net/
 #This program is free software; you can redistribute it and/or
 #modify it under the same terms as Perl itself.
+#
+# de.gsmbox.com modelled after GsmboxUK, 
+# looks promising, but it does not work...
+# The original webpage also fails, hmmm.
+# Thu Jun 27 20:19:37 CEST 2002, Juergen Weigert, jw@netvision.de
 
-package WWW::SMS::GsmboxUK;
+package WWW::SMS::GsmboxDE;
 use Telephone::Number;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(@PREFIXES _send MAXLENGTH);
 
-@PREFIXES = (Telephone::Number->new('44', [
-qw(370 374 378 385 401 402 403 410 411 421 441 467 468 498 585 589 772
-780 798 802 831 836 850 860 966 973 976 4481 4624 7000 7002 7074 7624
-7730 7765 7771 7781 7787 7866 7939 7941 7956 7957 7958 7961 7967 7970
-7977 7979 8700 9797)
+@PREFIXES = (Telephone::Number->new('49', [
+qw(151 160 170 171 175 152 1520 162 172 173 174 163 177 178 176 179)
         ], undef)
 );
 
@@ -24,7 +26,7 @@ sub MAXLENGTH () {120} # maximum message length
 
 sub hnd_error {
     $_ = shift;
-    $WWW::SMS::Error = "Failed at step $_ of module GsmboxUK.pm";
+    $WWW::SMS::Error = "Failed at step $_ of module GsmboxDE.pm";
     return 0;
 }
 
@@ -34,6 +36,8 @@ sub _send {
     use HTTP::Request::Common qw(GET POST);
     use HTTP::Cookies;
     use LWP::UserAgent;
+
+    return hnd_error("0 (GsmboxDE is unfinished)");
     
     $self->{smstext} = substr($self->{smstext}, 0, MAXLENGTH - 1) if (length($self->{smstext})>MAXLENGTH);
 
@@ -48,13 +52,14 @@ sub _send {
 
         #STEP 1
         my $step = 1;
-        my $req = POST 'http://uk.gsmbox.com/freesms/preview.gsmbox',
+        my $req = POST 'http://de.gsmbox.com/freesms/preview.gsmbox',
                     [
                         messaggio => $self->{smstext},
                         prefisso => $self->{prefix},
                         telefono => $self->{telnum},
-                        pluto => 'pippo',
-                        SUBMIT => 'Send'
+                        pluto => '8790',
+                        country => 'de',
+                        SUBMIT => 'Absenden'
                     ];
 
         my $file = $ua->request($req)->as_string;
@@ -71,9 +76,10 @@ sub _send {
                         messaggio => $self->{smstext},
                         telefono => $self->{telnum},
                         prefisso => $self->{prefix},
+                        country => 'de',
+			'96fe31369659d886e1723c9a46a08bb6' >= 'f667dbb8ed2bbf65cd13476e9a21ea8a',
                         $image_button.'.x' => int(rand($width_button)),
                         $image_button.'.y' => int(rand($height_button)),
-                        pluto => 'pippo',
                     ];
 
         $file = $ua->simple_request($req)->as_string;
