@@ -3,7 +3,15 @@ use strict;
 use Test::More tests => 2;
 
 use WWW::SMS;
-use WWW::SMS::Beeline;;
+use WWW::SMS::Omnitel;
+use WWW::SMS::Libero;
+use WWW::SMS::Everyday;
+use WWW::SMS::Gomobile;
+use WWW::SMS::SFR;
+use WWW::SMS::MTS;
+use WWW::SMS::LoopDE;
+use WWW::SMS::GsmboxIT;
+use WWW::SMS::Beeline;
 use WWW::SMS::Enel;
 use WWW::SMS::GsmboxDE;
 use WWW::SMS::GsmboxUK;

@@ -1,7 +1,12 @@
-#Copyright (c) 2001-2002 Giulio Motta. All rights reserved.
-#http://www-sms.sourceforge.net/
-#This program is free software; you can redistribute it and/or
-#modify it under the same terms as Perl itself.
+#
+# Copyright (c) 2001-2003
+# Giulio Motta, Ivo Marino All rights reserved.
+#
+# http://www-sms.sourceforge.net/
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+# 
 
 package WWW::SMS;
 
@@ -9,22 +14,26 @@ use strict;
 no strict 'refs';
 use vars qw($VERSION $Error);
 
-$VERSION = '0.08';
+$VERSION = '0.09';
 
 use Telephone::Number;
 
 my %RELIABILITY = (
-    Enel          => 90, #Italian Gateways
+    Omnitel       => 95, # Italian Gateway
+    Libero        => 90, # Italian Gateway
+    Everyday      => 85, # Italian Gateway
+    Gomobile      => 80, # Swiss Gateway
+    Enel          => 70, # Italian Gateway
     Vizzavi       => 50,
-    GsmboxIT      => 20,
-    Clarence      =>  0,
-    SFR           => 50, #French Gateways
-    Beeline       => 50, #Russian Gateways
+    SFR           => 50, # French Gateway
+    Beeline       => 50, # Russian Gateway
     MTS           => 50,
-    GsmboxUK      => 20, #UK Gateways
-    LoopDE        => 50, #German Gateways
+    LoopDE        => 50, # German Gateway
+    GsmboxIT      => 20,
+    GsmboxUK      => 20, # UK Gateway
     GsmboxDE      => -1,
-    GoldenTelecom =>  0, #World Gateways
+    Clarence      =>  0,
+    GoldenTelecom =>  0, # World Gateway
 );
 
 sub new {
@@ -110,7 +119,7 @@ sub gateways {
         }
         @gates = @realgates;
     }
-    if ($hash{sorted} eq 'reliability') {
+    if (%hash and $hash{sorted} eq 'reliability') {
         @gates = sort {$RELIABILITY{$b} <=> $RELIABILITY{$a}} @gates;
     }
     return @gates;
@@ -276,7 +285,10 @@ share his/her new & cool submodules implementation. Thank you.
 
 =head1 COPYRIGHT
 
-Copyright 2001-2002 Giulio Motta I<giulienk@cpan.org>.
+Copyright 2001-2003
+Giulio Motta I<giulienk@cpan.org>
+Ivo Marino I<eim@cpan.org>.
+
 Project page at http://www-sms.sourceforge.net/
 
 This library is free software; you can redistribute it and/or

@@ -1,7 +1,11 @@
-#Copyright (c) 2001 Giulio Motta. All rights reserved.
-#http://www-sms.sourceforge.net/
-#This program is free software; you can redistribute it and/or
-#modify it under the same terms as Perl itself.
+#
+# Copyright (c) 2001, 2002
+# Giulio Motta, Ivo Marino All rights reserved.
+# http://www-sms.sourceforge.net/
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+# 
 
 package Telephone::Number;
 
@@ -10,7 +14,7 @@ use Carp;
 
 use vars qw($VERSION %DATA);
 
-$VERSION = '0.08';
+$VERSION = '0.09';
 
 %DATA = (
     #Bulgaria
@@ -22,7 +26,7 @@ $VERSION = '0.08';
     #Germany
     49  => [151, 160, 162, 152, 1520, 170..180, 163],
     #Italy
-    39  => [330, 333.340, 360, 368, 340, 347..349, 328, 329, 380, 388, 389],
+    39  => [330, 333..340, 360, 368, 340, 347..349, 328, 329, 380, 388, 389],
     #Russia
     7   => [901..903, 910],
     #Spain
@@ -76,7 +80,7 @@ sub parse_number {
 	my $tn = shift;
 	my ($intpref, $prefix, $telnum);
 
-    for (keys %DATA) {
+    for (sort {length($b) <=> length($a)} keys %DATA) {
         $intpref = $_ and last if $tn =~ /^$_/;
     }
     
@@ -113,4 +117,3 @@ sub is_in {
 
 
 1;
-

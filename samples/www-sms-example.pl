@@ -1,8 +1,11 @@
 #!/usr/bin/perl
-#Copyright (c) 2001 Giulio Motta. All rights reserved.
-#http://www-sms.sourceforge.net/
-#This program is free software; you can redistribute it and/or
-#modify it under the same terms as Perl itself.
+
+#
+# Copyright (c) 2001 Giulio Motta. All rights reserved.
+# http://www-sms.sourceforge.net/
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
 
 use strict;
 use WWW::SMS;

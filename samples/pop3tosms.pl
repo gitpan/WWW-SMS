@@ -1,8 +1,11 @@
 #!/usr/bin/perl -w
-#Copyright (c) 2001 Giulio Motta. All rights reserved.
-#http://www-sms.sourceforge.net/
-#This program is free software; you can redistribute it and/or
-#modify it under the same terms as Perl itself.
+
+#
+# Copyright (c) 2001 Giulio Motta. All rights reserved.
+# http://www-sms.sourceforge.net/
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
 
 ######################################################################
 ### Cron this job on a server to have a SMS alert when you receive ###
